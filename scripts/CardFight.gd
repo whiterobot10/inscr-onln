@@ -672,7 +672,7 @@ func card_summoned(playedCard):
 #		eCard.calculate_buffs()
 
 	# Starvation, inflict damage if 9th onwards
-	if playedCard.card_data["name"] == "Starvation" and playedCard.attack >= 9:
+	if playedCard.card_data["name"] == CardInfo.all_cards[0]["name"] and playedCard.attack >= 9:
 		# Ramp damage over time so the game actually ends
 		inflict_damage(playedCard.attack - 8)
 	
@@ -889,7 +889,7 @@ func _opponent_played_card(card, slot, ignore_cost = false):
 	var card_dt = card if typeof(card) == TYPE_DICTIONARY else CardInfo.all_cards[card]
 	
 	# Special case: Starvation
-	if card_dt["name"] == "Starvation":
+	if card_dt["name"] == CardInfo.all_cards[0]["name"]:
 		
 		# Inflict starve damage
 		if turns_starving >= 9:
@@ -934,7 +934,7 @@ func _opponent_played_card_back(card, slot, ignore_cost = false):
 	var card_dt = card if typeof(card) == TYPE_DICTIONARY else CardInfo.all_cards[card]
 	
 	# Special case: Starvation
-#	if card_dt["name"] == "Starvation":
+#	if card_dt["name"] == CardInfo.all_cards[0]["name"]:
 #
 #		# Inflict starve damage
 #		if turns_starving >= 9:
@@ -986,8 +986,8 @@ remote func force_draw_starv(strength):
 	
 	var starv_data = CardInfo.all_cards[0].duplicate()
 	starv_data["attack"] = strength
-	if strength >= 5:
-		starv_data["sigils"] = ["Repulsive", "Mighty Leap"]
+	if strength >= 5 and not starv_data["sigils"].has("Mighty Leap"):
+		starv_data["sigils"].append("Mighty Leap")
 	
 	starv_card.from_data(starv_data)
 	
@@ -1207,7 +1207,7 @@ func start_turn():
 	for pharoah in gold_sarcophagus:
 		if pharoah.turnsleft <= 0:
 			draw_card(pharoah.card)
-			gold_sarcophagus.erase(pharoah.card)
+			gold_sarcophagus.erase(pharoah)
 		else:
 			pharoah.turnsleft -= 1
 	

@@ -59,6 +59,8 @@ func handle_event(event: String, params: Array):
 		if "sigils" in target.card_data:
 			# Deep copy sigil array
 			var n_sigils = target.card_data.sigils.duplicate()
+			if "Brittle" in n_sigils:
+				n_sigils.erase("Brittle")
 			n_sigils.append("Brittle")
 			target.card_data.sigils = n_sigils
 		else:
