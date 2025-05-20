@@ -14,6 +14,8 @@ func handle_event(event: String, params: Array):
 				if "sigils" in card2.card_data:
 				# Deep copy sigil array
 					var n_sigils = card2.card_data.sigils.duplicate()
+					if "Armored" in n_sigils:
+						n_sigils.erase("Armored")
 					n_sigils.append("Armored")
 					card2.card_data.sigils = n_sigils
 				else:
@@ -21,6 +23,6 @@ func handle_event(event: String, params: Array):
 					
 				var old_atk = card2.attack
 				var old_hp = card2.health
-				card2.from_data(card.card_data)
+				card2.from_data(card2.card_data)
 				card2.attack = old_atk
 				card2.health = old_hp
