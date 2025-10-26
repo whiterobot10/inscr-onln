@@ -70,19 +70,40 @@ func draw_special():
 		$DiveOlay.texture = load("res://gfx/cardextras/pixel_card_subicon_tent.png")
 	if "atkspecial" in card_data:
 
-		$AtkIcon.texture = $AtkIcon.texture.duplicate()
+		var d = Directory.new()
 		
-		match card_data.atkspecial:
-			"mox", "green_mox":
-				$AtkIcon.texture.region = Rect2(0, 0, 16, 8)
-			"mirror":
-				$AtkIcon.texture.region = Rect2(0, 27, 16, 8)
-			"ant":
-				$AtkIcon.texture.region = Rect2(0, 9, 16, 8)
-			"Bell":
-				$AtkIcon.texture.region = Rect2(0, 18, 16, 8)
-			"Hand":
-				$AtkIcon.texture.region = Rect2(0, 36, 16, 8)
+		var found = false
+
+		for potential_path in [
+			CardInfo.icon_override_path + card_data.atkspecial + ".png",
+			CardInfo.custom_icon_path + CardInfo.ruleset + "_" + card_data.atkspecial + ".png"
+		]:
+			if d.file_exists(potential_path):
+				var i = Image.new()
+				i.load(potential_path)
+				var sTex = ImageTexture.new()
+				sTex.create_from_image(i)
+				sTex.flags -= sTex.FLAG_FILTER
+				$AtkIcon.texture = sTex
+				found = true
+				break
+	
+		if not found:
+			$AtkIcon.texture = load("res://gfx/sigils/%s.png" % card_data.atkspecial)
+
+		#$AtkIcon.texture = $AtkIcon.texture.duplicate()
+		
+		#match card_data.atkspecial:
+		#	"mox", "green_mox":
+		#		$AtkIcon.texture.region = Rect2(0, 0, 16, 8)
+		#	"mirror":
+		#		$AtkIcon.texture.region = Rect2(0, 27, 16, 8)
+		#	"ant":
+		#		$AtkIcon.texture.region = Rect2(0, 9, 16, 8)
+		#	"Bell":
+		#		$AtkIcon.texture.region = Rect2(0, 18, 16, 8)
+		#	"Hand":
+		#		$AtkIcon.texture.region = Rect2(0, 36, 16, 8)
 
 		$AtkIcon.visible = true
 		$HBoxContainer/AtkScore.visible = false

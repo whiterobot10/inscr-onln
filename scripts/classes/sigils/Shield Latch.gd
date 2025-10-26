@@ -50,20 +50,22 @@ func handle_event(event: String, params: Array):
 		target = slotManager.get_friendly_card(target[3]) if target[2] else slotManager.get_enemy_card(target[3])
 		
 		target.get_node("CardBody/Highlight").show()
+		target.add_sigil("Armored")
+		target.remove_sigil("Repulsive")
 		
-		if "sigils" in target.card_data:
-			# Deep copy sigil array
-			var n_sigils = target.card_data.sigils.duplicate()
-			n_sigils.append("Armored")
-			target.card_data.sigils = n_sigils
-		else:
-			target.card_data.sigils = ["Armored"]
+		#if "sigils" in target.card_data:
+		#	# Deep copy sigil array
+		#	var n_sigils = target.card_data.sigils.duplicate()
+		#	n_sigils.append("Armored")
+		#	target.card_data.sigils = n_sigils
+		#else:
+		#	target.card_data.sigils = ["Armored"]
 			
-		var old_atk = target.attack
-		var old_hp = target.health
-		target.from_data(target.card_data)
-		target.attack = old_atk
-		target.health = old_hp
+		#var old_atk = target.attack
+		#var old_hp = target.health
+		#target.from_data(target.card_data)
+		#target.attack = old_atk
+		#target.health = old_hp
 		
 		if is_friendly:
 			card.queue_free()

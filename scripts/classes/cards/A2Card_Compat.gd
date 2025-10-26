@@ -214,7 +214,6 @@ func draw_sigils(cDat: Dictionary) -> void:
 	#find all sigils that render normally in the list of sigils
 	var filtered_sigils = []
 	for sig in cDat.get("sigils", []):
-		print(sig)
 		if !CardInfo.alternate_sigil_render_modes.has(sig):
 			filtered_sigils.append(sig)
 			

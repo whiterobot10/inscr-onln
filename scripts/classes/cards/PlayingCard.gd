@@ -63,6 +63,8 @@ func from_data(cdat):
 
 	create_sigils("Player" in get_path() as String or "Your" in get_path() as String)
 
+func redraw():
+	$CardBody.draw_from_data(card_data)
 
 
 func load_vanilla_sigil(name: String):
@@ -107,12 +109,28 @@ func setup_sigil(sig, friendly: bool):
 		if sig.has_method(keys[trigger].to_lower()):
 			grouped_sigils[trigger].append(sig)
 	
+func add_sigil(sigil):
+	#why is this the proper way to determine if a card is friendly?
+	var new_sig = try_load_sigil(sigil, "Player" in get_path() as String or "Your" in get_path() as String)
+	#if the sigil fails to get added, don't bother with anything else
+	if !new_sig:
+		return
+		
+	if "sigils" in card_data:
+		card_data.sigils.append(sigil);
+	else:
+		card_data.sigils = [sigil]
+	redraw()
+
 func remove_sigil(sigil):
 	sigils.erase(sigil);
 	for i in range(grouped_sigils.size()):
 		grouped_sigils[i].erase(sigil)
 		if grouped_sigils[i].size() > 1:
 			grouped_sigils[i].sort_custom(self, "sort_sigils_sort")
+	#change how the card renders
+	card_data.sigils.erase(sigil)
+	redraw()
 
 func create_sigils(friendly):
 	
