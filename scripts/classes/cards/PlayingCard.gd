@@ -63,8 +63,9 @@ func from_data(cdat):
 
 	create_sigils("Player" in get_path() as String or "Your" in get_path() as String)
 
-func redraw():
-	$CardBody.draw_from_data(card_data)
+func redraw_sigils():
+	$CardBody.draw_sigils(card_data)
+	draw_stats()
 
 
 func load_vanilla_sigil(name: String):
@@ -88,18 +89,19 @@ func try_load_sigil(name: String, friendly: bool):
 	if not sig:
 		sig = load_custom_sigil(name)
 	if sig:
-		setup_sigil(sig, friendly)
+		setup_sigil(sig, name, friendly)
 	else:
 		print("Sigil '%s' not found!" % name)
 	return sig
 
 #and this too
 #in theory, these two could be combined, but I think it's easier to understand if they aren't
-func setup_sigil(sig, friendly: bool):
+func setup_sigil(sig, name, friendly: bool):
 	sig.fightManager = fightManager
 	sig.slotManager = slotManager
 	sig.card = self
 	sig.is_friendly = friendly
+	sig.name = name
 	sigils.append(sig)
 	
 	# sort sigils into grouped_sigils
@@ -117,20 +119,29 @@ func add_sigil(sigil):
 		return
 		
 	if "sigils" in card_data:
+		card_data.sigils = card_data.sigils.duplicate()
 		card_data.sigils.append(sigil);
 	else:
 		card_data.sigils = [sigil]
-	redraw()
+	redraw_sigils()
 
 func remove_sigil(sigil):
-	sigils.erase(sigil);
+	var to_erase = null
+	if typeof(sigil) == TYPE_STRING:
+		for sig in sigils:
+			if(sig.name == sigil):
+				to_erase = sig
+	else:
+		to_erase = sigil
+	
+	sigils.erase(to_erase);
 	for i in range(grouped_sigils.size()):
-		grouped_sigils[i].erase(sigil)
+		grouped_sigils[i].erase(to_erase)
 		if grouped_sigils[i].size() > 1:
 			grouped_sigils[i].sort_custom(self, "sort_sigils_sort")
 	#change how the card renders
 	card_data.sigils.erase(sigil)
-	redraw()
+	redraw_sigils()
 
 func create_sigils(friendly):
 	
@@ -1025,9 +1036,9 @@ func take_damage(damagingCard, dmgAmt = SigilEffect.UNDEFINED_DAMAGE_VAL):
 	#
 	for sig in grouped_sigils[SigilEffect.SigilTriggers.MODIFY_DAMAGE_TAKEN]:
 		dmgAmt = sig.modify_damage_taken(dmgAmt)
-	
 
-	health -= dmgAmt
+	if dmgAmt > 0:
+		health -= dmgAmt
 	draw_stats()
 	
 	if damagingCard:

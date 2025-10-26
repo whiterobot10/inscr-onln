@@ -27,6 +27,7 @@ var fightManager = null # See FightManager.gd
 var slotManager = null # See CardSlots.gd
 var is_friendly = null # Whether the card the sigil is attached to is owned by the local player
 var card = null # The card the sigil is attached to
+var name = "" # Neccessary for proper removal of sigils
 
 
 #Handles signal events, good generic method to use
