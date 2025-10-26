@@ -120,19 +120,39 @@ func draw_accessibility(cDat):
 func draw_atkspecial(cDat):
 	if "atkspecial" in cDat:
 
-		$AtkIcon.texture = $AtkIcon.texture.duplicate()
+		var d = Directory.new()
 		
-		match cDat.atkspecial:
-			"mox", "green_mox":
-				$AtkIcon.texture.region = Rect2(0, 0, 16, 8)
-			"mirror":
-				$AtkIcon.texture.region = Rect2(0, 27, 16, 8)
-			"ant":
-				$AtkIcon.texture.region = Rect2(0, 9, 16, 8)
-			"Bell":
-				$AtkIcon.texture.region = Rect2(0, 18, 16, 8)
-			"Hand":
-				$AtkIcon.texture.region = Rect2(0, 36, 16, 8)
+		var found = false
+
+		for potential_path in [
+			CardInfo.icon_override_path + cDat.atkspecial + ".png",
+			CardInfo.custom_icon_path + CardInfo.ruleset + "_" + cDat.atkspecial + ".png"
+		]:
+			if d.file_exists(potential_path):
+				var i = Image.new()
+				i.load(potential_path)
+				var sTex = ImageTexture.new()
+				sTex.create_from_image(i)
+				sTex.flags -= sTex.FLAG_FILTER
+				$AtkIcon.texture = sTex
+				found = true
+				break
+	
+		if not found:
+			$AtkIcon.texture = load("res://gfx/sigils/%s.png" % cDat.atkspecial)
+
+		#$AtkIcon.texture = $AtkIcon.texture.duplicate()	
+		#match cDat.atkspecial:
+		#	"mox", "green_mox":
+		#		$AtkIcon.texture.region = Rect2(0, 0, 16, 8)
+		#	"mirror":
+		#		$AtkIcon.texture.region = Rect2(0, 27, 16, 8)
+		#	"ant":
+		#		$AtkIcon.texture.region = Rect2(0, 9, 16, 8)
+		#	"Bell":
+		#		$AtkIcon.texture.region = Rect2(0, 18, 16, 8)
+		#	"Hand":
+		#		$AtkIcon.texture.region = Rect2(0, 36, 16, 8)
 
 		$AtkIcon.visible = true
 		$AtkScore.visible = false
@@ -190,7 +210,16 @@ func draw_stats(cDat: Dictionary) -> void:
 
 func draw_sigils(cDat: Dictionary) -> void:
 	
-	var sCount = len(cDat.get("sigils", []))
+	
+	#find all sigils that render normally in the list of sigils
+	var filtered_sigils = []
+	for sig in cDat.get("sigils", []):
+		print(sig)
+		if !CardInfo.alternate_sigil_render_modes.has(sig):
+			filtered_sigils.append(sig)
+			
+			
+	var sCount = len(filtered_sigils)
 	
 	# Clear, in case it needs to happen again
 	for sigSlt in SIGIL_SLOTS:
@@ -211,8 +240,8 @@ func draw_sigils(cDat: Dictionary) -> void:
 		var found = false
 		
 		for potential_path in [
-			CardInfo.icon_override_path + cDat.sigils[sIdx] + ".png",
-			CardInfo.custom_icon_path + CardInfo.ruleset + "_" + cDat.sigils[sIdx] + ".png"
+			CardInfo.icon_override_path + filtered_sigils[sIdx] + ".png",
+			CardInfo.custom_icon_path + CardInfo.ruleset + "_" + filtered_sigils[sIdx] + ".png"
 		]:
 			if d.file_exists(potential_path):
 				var i = Image.new()
@@ -225,7 +254,7 @@ func draw_sigils(cDat: Dictionary) -> void:
 				break
 		
 		if not found:
-			cNode.texture = load("res://gfx/sigils/%s.png" % cDat.sigils[sIdx])
+			cNode.texture = load("res://gfx/sigils/%s.png" % filtered_sigils[sIdx])
 		
 		cNode.show()
 

@@ -63,6 +63,8 @@ func from_data(cdat):
 
 	create_sigils("Player" in get_path() as String or "Your" in get_path() as String)
 
+
+
 func load_vanilla_sigil(name: String):
 	var sig_path = "res://scripts/classes/sigils/" + name + ".gd"
 	if ResourceLoader.exists(sig_path):
@@ -78,60 +80,74 @@ func load_custom_sigil(name: String):
 	else:
 		return false
 
+#probably a good idea to make this a function
+func try_load_sigil(name: String, friendly: bool):
+	var sig = load_vanilla_sigil(name)
+	if not sig:
+		sig = load_custom_sigil(name)
+	if sig:
+		setup_sigil(sig, friendly)
+	else:
+		print("Sigil '%s' not found!" % name)
+	return sig
+
+#and this too
+#in theory, these two could be combined, but I think it's easier to understand if they aren't
+func setup_sigil(sig, friendly: bool):
+	sig.fightManager = fightManager
+	sig.slotManager = slotManager
+	sig.card = self
+	sig.is_friendly = friendly
+	sigils.append(sig)
+	
+	# sort sigils into grouped_sigils
+	var keys = SigilEffect.SigilTriggers.keys()
+	for trigger in SigilEffect.SigilTriggers.values():
+		#Janky a** trick that requires me to comment out all the functions from SigilEffect
+		if sig.has_method(keys[trigger].to_lower()):
+			grouped_sigils[trigger].append(sig)
+	
+func remove_sigil(sigil):
+	sigils.erase(sigil);
+	for i in range(grouped_sigils.size()):
+		grouped_sigils[i].erase(sigil)
+		if grouped_sigils[i].size() > 1:
+			grouped_sigils[i].sort_custom(self, "sort_sigils_sort")
+
 func create_sigils(friendly):
 	
-	if "atkspecial" in card_data:
-		print("atkspecial detected, attempting to add attack sigil")
-		power_defining_sigil = load_custom_sigil(card_data.atkspecial)
-		if not power_defining_sigil:
-			power_defining_sigil = load_vanilla_sigil(card_data.atkspecial)
-		if power_defining_sigil:
-			power_defining_sigil.fightManager = fightManager
-			power_defining_sigil.slotManager = slotManager
-			power_defining_sigil.card = self
-			power_defining_sigil.is_friendly = friendly
-	
 	sigils.clear()
-
 
 	#resize grouped_sigils to fit ALL the things in it!
 	var size = SigilEffect.SigilTriggers.values().size()
 	grouped_sigils.resize(size)
+	
 	#using fill puts the SAME list in all slots, so we can't use that
 	for i in range(size):
 		grouped_sigils[i]=[]
+
+
+
+	if "atkspecial" in card_data:
+		print("atkspecial detected, attempting to add attack sigil")
+		power_defining_sigil = try_load_sigil(card_data.atkspecial, friendly)
+
 
 	if not "sigils" in card_data:
 		return
 
 	for sig in card_data.sigils:
-		
-		var new_sig = load_custom_sigil(sig)
-		
-		if not new_sig:
-			new_sig = load_vanilla_sigil(sig)
-		
-		if not new_sig:
-			print("Sigil '%s' not found!" % sig)
-			continue
-		
-		new_sig.fightManager = fightManager
-		new_sig.slotManager = slotManager
-		new_sig.card = self
-		new_sig.is_friendly = friendly
-		sigils.append(new_sig)
-		#Sort da sigils!
-		var keys = SigilEffect.SigilTriggers.keys()
-		for trigger in SigilEffect.SigilTriggers.values():
-			#Janky a** trick that requires me to comment out all the functions from SigilEffect
-			if new_sig.has_method(keys[trigger].to_lower()):
-				grouped_sigils[trigger].append(new_sig)
+		var new_sig = try_load_sigil(sig, friendly)
 	
-	for i in range(size):
+	sort_sigils()
+
+#this three
+func sort_sigils():
+	for i in range(grouped_sigils.size()):
 		if grouped_sigils[i].size() > 1:
-			grouped_sigils[i].sort_custom(self, "sort_sigils")
-			
-func sort_sigils(a, b): return a.priority() > b.priority()
+			grouped_sigils[i].sort_custom(self, "sort_sigils_sort")
+
+func sort_sigils_sort(a, b): return a.priority() > b.priority()
 
 func handle_sigil_event(event, params):
 	for sig in sigils:
@@ -262,6 +278,9 @@ func _on_Button_pressed():
 
 		# Am I about to be sacrificed
 		if fightManager.state == fightManager.GameStates.SACRIFICE:
+			print(self)
+			print(slotManager)
+			print(slotManager.sac_victims)
 			if self in slotManager.sac_victims:
 				slotManager.sac_victims.erase(self)
 				$CardBody/SacOlay.visible = false

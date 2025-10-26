@@ -41,11 +41,9 @@ func handle_event(_event: String, _params: Array):
 func priority():
 	return 0
 
-
-
 #Used for sigils that passively define the power of the card they're attached to, such as Ant, Spilled Blood, etc...
 #IMPORTANT! Sigils with this effect do not go with normal sigils, they must be put in the 'atkspecial' arguement.
-#Note that sigils in 'atkspecial' will be excluded from the normal sigil list(s), meaning none of their other functions will trigger.
+#Note that as of an update, power defining sigils now work properly with other functions.
 func define_power():
 	return -1
 	

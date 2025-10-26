@@ -88,9 +88,18 @@ func from_game_info_json(content_as_object):
 #	working_sigils = all_data["working_sigils"]
 
 	if "custom_sigils" in all_data:
+		#for the funny render mode thing
+		var keys = AlternateRenderMode.keys()
+		
 		for sig in all_data.custom_sigils:
 			all_sigils[sig] = all_data.custom_sigils[sig].description
-	
+			
+			#see if there's a funny render mode thing
+			var sigil_render_mode = alternate_sigil_render_modes[sig].render_mode
+			for val in AlternateRenderMode.values():
+				if sigil_render_mode.to_upper() == keys[val]:
+					alternate_sigil_render_modes[sig] = val;
+
 	side_decks = all_data["side_decks"] if "side_decks" in all_data else []
 	
 	if "ruleset" in all_data:
@@ -271,6 +280,22 @@ const all_sigils = {
 	"Warded": "A card bearing this sigil takes only 1 damage from attacks and card effects.",
 	"Waterborne": "A card bearing this sigil submerges itself during its opponent's turn. while submerged, opposing creatures attack its owner directly.",
 	"Worthy Sacrifice": "A card bearing this sigil is counted as 3 blood rather than 1 blood when sacrificed."
+}
+
+enum AlternateRenderMode {
+	ATKSPECIAL,
+	INVISIBLE,
+	OVERLAY
+}
+
+const alternate_sigil_render_modes = {
+	"ant": AlternateRenderMode.ATKSPECIAL,
+	"Bell": AlternateRenderMode.ATKSPECIAL,
+	"green_mox": AlternateRenderMode.ATKSPECIAL,
+	"Hand": AlternateRenderMode.ATKSPECIAL,
+	"mirror": AlternateRenderMode.ATKSPECIAL,
+	"mox": AlternateRenderMode.ATKSPECIAL,
+	"Shield": AlternateRenderMode.OVERLAY
 }
 
 const working_sigils = [
