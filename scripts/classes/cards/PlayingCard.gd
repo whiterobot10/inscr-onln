@@ -117,7 +117,7 @@ func add_sigil(sigil):
 	#if the sigil fails to get added, don't bother with anything else
 	if !new_sig:
 		return
-		
+	#add to card_data, then redraw the card from its data
 	if "sigils" in card_data:
 		card_data.sigils = card_data.sigils.duplicate()
 		card_data.sigils.append(sigil);
@@ -126,6 +126,7 @@ func add_sigil(sigil):
 	redraw_sigils()
 
 func remove_sigil(sigil):
+	#if sigil is a string, find the sigil that matches it in the lists
 	var to_erase = null
 	if typeof(sigil) == TYPE_STRING:
 		for sig in sigils:
@@ -133,13 +134,14 @@ func remove_sigil(sigil):
 				to_erase = sig
 	else:
 		to_erase = sigil
-	
+	#remove the sigil
 	sigils.erase(to_erase);
 	for i in range(grouped_sigils.size()):
 		grouped_sigils[i].erase(to_erase)
 		if grouped_sigils[i].size() > 1:
 			grouped_sigils[i].sort_custom(self, "sort_sigils_sort")
-	#change how the card renders
+
+	#remove from card_data, then redraw the card from its data
 	card_data.sigils.erase(sigil)
 	redraw_sigils()
 
