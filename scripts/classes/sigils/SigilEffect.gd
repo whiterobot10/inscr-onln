@@ -48,14 +48,24 @@ func priority():
 func define_power():
 	return -1
 	
+	
+# YES, ALL OF THESE ARE COMMENTED OUT FOR A REASON. THEY'LL STILL WORK, BECAUSE IF I CAN'T HAVE INTERFACES... I'M GONNA F*CKING FAKE IT!
+	
+#defines how an active sigil works
+#Note that if a card has two active sigils, only the first one will work.
+#Do note the second function must also exist, although you can just have it return null if nothing should happen.
+#If the sigil has failed to be activated, due to conditions not being met, return null;
+#func on_activate():
+	#return arguement	
+	
+#func on_activate_remote(arg):
+	#pass
+	
 #defines how much extra blood this sigil causes the card to provide.
 #Cards that provide 0 or less blood cannot be sacrificed, but can still be hammered.
 #Sigil values are added together, so if you want to have a sigil stop sacrificing, use something like -99
 #func bonus_blood():
 #	return 0
-
-
-# YES, ALL OF THESE ARE COMMENTED OUT FOR A REASON. THEY'LL STILL WORK, BECAUSE IF I CAN'T HAVE INTERFACES... I'M GONNA F*CKING FAKE IT!
 
 #Used for sigils that modify how many times the card attacks and in what lanes.
 #ex: Bifurcated Strike, Trifrucated Strike, Double strike, Omni strike

@@ -51,7 +51,6 @@ func handle_event(event: String, params: Array):
 		
 		target.get_node("CardBody/Highlight").show()
 		target.add_sigil("Armored")
-		target.remove_sigil("Repulsive")
 		
 		#if "sigils" in target.card_data:
 		#	# Deep copy sigil array

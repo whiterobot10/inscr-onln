@@ -827,30 +827,34 @@ func remote_card_summon(cDat, slot_idx):
 func remote_activate_sigil(card_slot, arg = 0):
 
 	var eCard = enemy_slots[card_slot].get_child(0)
+	
+	if eCard.active_sigil!=null:
+		eCard.active_sigil.on_activate_remote(arg)
+	
 	var sName = eCard.card_data["sigils"][0]
 
-	if sName == "True Scholar":
-		eCard.get_node("AnimationPlayer").play("Perish")
-		yield(eCard.get_node("AnimationPlayer"), "animation_finished")
-		fightManager.move_done()
-		return
+	#if sName == "True Scholar":
+	#	eCard.get_node("AnimationPlayer").play("Perish")
+	#	yield(eCard.get_node("AnimationPlayer"), "animation_finished")
+	#	fightManager.move_done()
+	#	return
 
-	if sName == "Acupuncture":
-		var pCard = get_friendly_card(arg)
-		fightManager.add_opponent_bones(-3)
+	#if sName == "Acupuncture":
+	#	var pCard = get_friendly_card(arg)
+	#	fightManager.add_opponent_bones(-3)
 
-		# Add the new sigil to the card
-		var new_sigs = []
+	#	# Add the new sigil to the card
+	#	var new_sigs = []
 		
-		if "sigils" in pCard.card_data:
-			new_sigs = pCard.card_data.sigils.duplicate()
-		new_sigs.append("Stitched")
-		pCard.card_data.sigils = new_sigs
-		pCard.from_data(pCard.card_data)
-		
-		eCard.get_node("CardBody/Highlight").show()
+	#	if "sigils" in pCard.card_data:
+	#		new_sigs = pCard.card_data.sigils.duplicate()
+	#	new_sigs.append("Stitched")
+	#	pCard.card_data.sigils = new_sigs
+	#	pCard.from_data(pCard.card_data)
+	#	
+	#	eCard.get_node("CardBody/Highlight").show()
 
-		fightManager.move_done()
+	#	fightManager.move_done()
 
 
 	if sName == "Energy Gun":

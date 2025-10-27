@@ -39,6 +39,7 @@ var sigils = []
 var grouped_sigils = []
 
 var power_defining_sigil = null #The singular sigil that defines the card's attack, such as Ant, Blood Spilled, etc. Should be null if there is none
+var active_sigil = null #The singular sigil that does a thing when you hit the button. Should be null if there is none
 
 
 
@@ -62,11 +63,6 @@ func from_data(cdat):
 	$CardBody/CardBtn.disabled = false
 
 	create_sigils("Player" in get_path() as String or "Your" in get_path() as String)
-
-func redraw_sigils():
-	$CardBody.draw_sigils(card_data)
-	draw_stats()
-
 
 func load_vanilla_sigil(name: String):
 	var sig_path = "res://scripts/classes/sigils/" + name + ".gd"
@@ -104,6 +100,9 @@ func setup_sigil(sig, name, friendly: bool):
 	sig.name = name
 	sigils.append(sig)
 	
+	if active_sigil == null and sig.has_method("on_activate"):
+		active_sigil = sig;
+	
 	# sort sigils into grouped_sigils
 	var keys = SigilEffect.SigilTriggers.keys()
 	for trigger in SigilEffect.SigilTriggers.values():
@@ -111,7 +110,7 @@ func setup_sigil(sig, name, friendly: bool):
 		if sig.has_method(keys[trigger].to_lower()):
 			grouped_sigils[trigger].append(sig)
 	
-func add_sigil(sigil):
+func add_sigil(sigil: String):
 	#why is this the proper way to determine if a card is friendly?
 	var new_sig = try_load_sigil(sigil, "Player" in get_path() as String or "Your" in get_path() as String)
 	#if the sigil fails to get added, don't bother with anything else
@@ -123,27 +122,23 @@ func add_sigil(sigil):
 		card_data.sigils.append(sigil);
 	else:
 		card_data.sigils = [sigil]
-	redraw_sigils()
+	$CardBody.draw_sigils(card_data)
 
-func remove_sigil(sigil):
-	#if sigil is a string, find the sigil that matches it in the lists
+func remove_sigil(sigil: String):
+	#find the first sigil with the chosen name in the list of sigils
 	var to_erase = null
-	if typeof(sigil) == TYPE_STRING:
-		for sig in sigils:
-			if(sig.name == sigil):
-				to_erase = sig
-	else:
-		to_erase = sigil
+	for sig in sigils:
+		if(sig.name == sigil):
+			to_erase = sig
+			break
 	#remove the sigil
 	sigils.erase(to_erase);
 	for i in range(grouped_sigils.size()):
 		grouped_sigils[i].erase(to_erase)
-		if grouped_sigils[i].size() > 1:
-			grouped_sigils[i].sort_custom(self, "sort_sigils_sort")
 
 	#remove from card_data, then redraw the card from its data
 	card_data.sigils.erase(sigil)
-	redraw_sigils()
+	$CardBody.draw_sigils(card_data)
 
 func create_sigils(friendly):
 	
@@ -558,88 +553,99 @@ func begin_perish(double_death = false):
 
 func _on_ActiveSigil_pressed():
 
+	if active_sigil != null:
+		var value = active_sigil.on_activate();
+		#learned the neccessity of the second one the hard way
+		if value != null and typeof(value) != typeof(GDScriptFunctionState):
+			fightManager.send_move({
+				"type": "activate_sigil",
+				"slot": slot_idx(),
+				"arg": value
+			})
+		return
+	
 	# Sigil Effects
 	var sig_name = card_data["sigils"][0]
 
-	if sig_name == "True Scholar":
-		if not slotManager.get_friendly_cards_sigil("Blue Mox") and not slotManager.get_friendly_cards_sigil("Great Mox"):
-			return
+	#if sig_name == "True Scholar":
+	#	if not slotManager.get_friendly_cards_sigil("Blue Mox") and not slotManager.get_friendly_cards_sigil("Great Mox"):
+	#		return
 
-		for _i in range(3):
-			if fightManager.deck.size() == 0:
-				break
+	#	for _i in range(3):
+	#		if fightManager.deck.size() == 0:
+	#			break
 
-			fightManager.draw_card(fightManager.deck.pop_front())
+	#		fightManager.draw_card(fightManager.deck.pop_front())
 
-			# Some interaction here if your deck has less than 3 cards. Don't punish I guess?
-			if fightManager.deck.size() == 0:
-				fightManager.get_node("DrawPiles/YourDecks/Deck").visible = false
-				break
+	#		# Some interaction here if your deck has less than 3 cards. Don't punish I guess?
+	#		if fightManager.deck.size() == 0:
+	#			fightManager.get_node("DrawPiles/YourDecks/Deck").visible = false
+	#			break
 
-		$AnimationPlayer.play("Perish")
-		$CardBody/Active.disabled = true
-		$CardBody/Active.mouse_filter = MOUSE_FILTER_IGNORE
-#		slotManager.rpc_id(fightManager.opponent, "remote_activate_sigil", get_parent().get_position_in_parent(), attack)
+	#	$AnimationPlayer.play("Perish")
+	#	$CardBody/Active.disabled = true
+	#	$CardBody/Active.mouse_filter = MOUSE_FILTER_IGNORE
+#	#	slotManager.rpc_id(fightManager.opponent, "remote_activate_sigil", get_parent().get_position_in_parent(), attack)
 
-		fightManager.send_move({
-			"type": "activate_sigil",
-			"slot": slot_idx(),
-			"arg": attack
-		})
+	#	fightManager.send_move({
+	#		"type": "activate_sigil",
+	#		"slot": slot_idx(),
+	#		"arg": attack
+	#	})
 
-		return
+	#	return
 
-	if sig_name == "Acupuncture":
-		if fightManager.bones < 3:
-			return
+	#if sig_name == "Acupuncture":
+	#	if fightManager.bones < 3:
+	#		return
 
-		# Does not work on the moon
-		if fightManager.get_node("MoonFight/BothMoons/EnemyMoon").visible:
-			return
+	#	# Does not work on the moon
+	#	if fightManager.get_node("MoonFight/BothMoons/EnemyMoon").visible:
+	#		return
 
-		# Anyone to curse?
-		if len(slotManager.all_enemy_cards()) == 0:
-			return
+	#	# Anyone to curse?
+	#	if len(slotManager.all_enemy_cards()) == 0:
+	#		return
 
-		# Ready No. 13
-		fightManager.sniper = self
-		fightManager.state = fightManager.GameStates.SNIPE
-		fightManager.snipe_is_attack = false
+	#	# Ready No. 13
+	#	fightManager.sniper = self
+	#	fightManager.state = fightManager.GameStates.SNIPE
+	#	fightManager.snipe_is_attack = false
 
-		var targetData = yield(fightManager, "snipe_complete")
-		fightManager.state = fightManager.GameStates.NORMAL
+	#	var targetData = yield(fightManager, "snipe_complete")
+	#	fightManager.state = fightManager.GameStates.NORMAL
 
-		var victim = slotManager.get_enemy_card(targetData[3])
+	#	var victim = slotManager.get_enemy_card(targetData[3])
 
-		# Don't let you shoot nothing
-		if not victim:
-			return
+	#	# Don't let you shoot nothing
+	#	if not victim:
+	#		return
 			
-		# Don't let you apply the sigil more than once
-		if "sigils" in victim.card_data and "Stitched" in victim.card_data.sigils:
-			return
+	#	# Don't let you apply the sigil more than once
+	#	if "sigils" in victim.card_data and "Stitched" in victim.card_data.sigils:
+	#		return
 
-		fightManager.add_bones(-3)
+	#	fightManager.add_bones(-3)
 
-		# Add the new sigil to the card
-		var new_sigs = []
+	#	# Add the new sigil to the card
+	#	var new_sigs = []
+	#	
+	#	if "sigils" in victim.card_data:
+	#		new_sigs = victim.card_data.sigils.duplicate()
+	#	new_sigs.append("Stitched")
+	#	victim.card_data.sigils = new_sigs
+	#	victim.from_data(victim.card_data)
 		
-		if "sigils" in victim.card_data:
-			new_sigs = victim.card_data.sigils.duplicate()
-		new_sigs.append("Stitched")
-		victim.card_data.sigils = new_sigs
-		victim.from_data(victim.card_data)
-		
-		# Shield the bastard
-		$CardBody/Highlight.show()
+	#	# Shield the bastard
+	#	$CardBody/Highlight.show()
 
-		fightManager.send_move({
-			"type": "activate_sigil",
-			"slot": slot_idx(),
-			"arg": targetData[3]
-		})
+	#	fightManager.send_move({
+	#		"type": "activate_sigil",
+	#		"slot": slot_idx(),
+	#		"arg": targetData[3]
+	#	})
 
-		return
+	#	return
 
 
 	if sig_name == "Energy Gun":
