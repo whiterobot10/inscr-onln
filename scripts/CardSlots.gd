@@ -201,7 +201,7 @@ func pre_turn_sigils(friendly: bool):
 			cd.disabled = false
 			cd.mouse_filter = MOUSE_FILTER_STOP
 		
-		for sig in card.grouped_sigils[SigilEffect.SigilTriggers.START_OF_TURN]:
+		for sig in card.grouped_sigils[SigilEffect.SigilTriggers.START_OF_TURN].duplicate():
 			sig.start_of_turn(cardAnim)
 		
 #		# Evolution
@@ -353,7 +353,7 @@ func post_turn_sigils(friendly: bool):
 		
 		var cardAnim = card.get_node("AnimationPlayer")
 		
-		for sig in card.grouped_sigils[SigilEffect.SigilTriggers.END_OF_TURN]:
+		for sig in card.grouped_sigils[SigilEffect.SigilTriggers.END_OF_TURN].duplicate():
 			sig.end_of_turn(cardAnim)
 
 #		if card.has_sigil("Bone Digger"):
@@ -468,7 +468,7 @@ func initiate_combat(friendly: bool):
 		# else:
 			
 		strikes[slot_index] += 1
-		for sig in pCard.grouped_sigils[SigilEffect.SigilTriggers.MODIFY_ATTACK_TARGETING]:
+		for sig in pCard.grouped_sigils[SigilEffect.SigilTriggers.MODIFY_ATTACK_TARGETING].duplicate():
 			strikes = sig.modify_attack_targeting(slot_index, strikes)
 		
 			# strikes[slot_index] += 0 if pCard.has_sigil("Bifurcated Strike") else 1
@@ -568,7 +568,7 @@ func initiate_combat(friendly: bool):
 		
 		#if has_attacked and pCard.has_sigil("Brittle"):
 		#	cardAnim.play("Perish")
-		for sig in pCard.grouped_sigils[SigilEffect.SigilTriggers.AFTER_ATTACKS]:
+		for sig in pCard.grouped_sigils[SigilEffect.SigilTriggers.AFTER_ATTACKS].duplicate():
 			sig.after_attacks(cardAnim, has_attacked)
 
 	yield(get_tree().create_timer(0.01), "timeout")
@@ -584,13 +584,13 @@ func pre_attack_logic(friendly: bool, attacker, to_slot):
 	if friendly:
 		var attack_targeting = SigilEffect.AttackTargeting.SCALE if is_slot_empty(enemy_slots[to_slot]) else SigilEffect.AttackTargeting.CARD
 		for enemyCard in all_enemy_cards():
-			for sig in enemyCard.grouped_sigils[SigilEffect.SigilTriggers.PRE_ENEMY_ATTACK]:
+			for sig in enemyCard.grouped_sigils[SigilEffect.SigilTriggers.PRE_ENEMY_ATTACK].duplicate():
 				# I put the mole logic in here!
 				sig.pre_enemy_attack(attacker, to_slot, attack_targeting)
 	else:
 		var attack_targeting = SigilEffect.AttackTargeting.SCALE if is_slot_empty(player_slots[to_slot]) else SigilEffect.AttackTargeting.CARD
 		for playerCard in all_friendly_cards():
-			for sig in playerCard.grouped_sigils[SigilEffect.SigilTriggers.PRE_ENEMY_ATTACK]:
+			for sig in playerCard.grouped_sigils[SigilEffect.SigilTriggers.PRE_ENEMY_ATTACK].duplicate():
 				# I put the mole logic in here!
 				sig.pre_enemy_attack(attacker, to_slot, attack_targeting)
 
@@ -606,11 +606,11 @@ func get_attack_targeting(friendly: bool, attacker, defender):
 	
 	var attack_targeting = SigilEffect.AttackTargeting.CARD if defender else SigilEffect.AttackTargeting.SCALE
 	
-	for sig in attacker.grouped_sigils[SigilEffect.SigilTriggers.ATTACKER_TARGET_SELECTING]:
+	for sig in attacker.grouped_sigils[SigilEffect.SigilTriggers.ATTACKER_TARGET_SELECTING].duplicate():
 		attack_targeting = sig.attacker_target_selecting(attack_targeting, defender)
 	
 	if defender:
-		for sig in defender.grouped_sigils[SigilEffect.SigilTriggers.DEFENDER_TARGET_SELECTING]:
+		for sig in defender.grouped_sigils[SigilEffect.SigilTriggers.DEFENDER_TARGET_SELECTING].duplicate():
 			attack_targeting = sig.defender_target_selecting(attack_targeting, attacker)
 	
 #	print(SigilEffect.AttackTargeting.keys()[attack_targeting])
@@ -725,7 +725,7 @@ func handle_attack(from_slot, to_slot):
 		fightManager.inflict_damage(damage)
 
 
-		for sig in pCard.grouped_sigils[SigilEffect.SigilTriggers.ON_DAMAGE_SCALE]:
+		for sig in pCard.grouped_sigils[SigilEffect.SigilTriggers.ON_DAMAGE_SCALE].duplicate():
 			sig.on_damage_scale(damage)
 		# Looter
 #		if pCard.has_sigil("Looter"):

@@ -14,7 +14,7 @@ func start_of_turn(card_anim):
 		card.card_data.health += 1
 		card.attack += 1
 		card.health += 1
-		card.remove_sigil("Fledgling")
+		card.remove_sigil(name)
 		card.draw_stats()
 
 	# Calculate buffs

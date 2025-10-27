@@ -5,14 +5,17 @@ func start_of_turn(card_anim):
 	card_anim.play("Evolve")
 	yield (card_anim, "animation_finished")
 
+
+	card.remove_sigil(name)
+	card.add_sigil("Fledgling")
 	# Deep copy
-	var dmgTaken = card.card_data["health"] - card.health
-	var new_sigs: Array = card.card_data.sigils.duplicate()
-	new_sigs.erase("Fledgling 2")
-	new_sigs.append("Fledgling")
-	card.card_data.sigils = new_sigs
-	card.from_data(card.card_data)
-	card.health = card.card_data["health"] - dmgTaken
+	#var dmgTaken = card.card_data["health"] - card.health
+	#var new_sigs: Array = card.card_data.sigils.duplicate()
+	#new_sigs.erase("Fledgling 2")
+	#new_sigs.append("Fledgling")
+	#card.card_data.sigils = new_sigs
+	#card.from_data(card.card_data)
+	#card.health = card.card_data["health"] - dmgTaken
 	
 	slotManager.recalculate_buffs_and_such()
 #	for fcard in slotManager.all_friendly_cards():

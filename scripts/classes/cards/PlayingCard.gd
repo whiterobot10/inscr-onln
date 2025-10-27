@@ -917,7 +917,7 @@ func calculate_buffs():
 		if not attack:
 			attack = 0
 	
-	for sig in grouped_sigils[SigilEffect.SigilTriggers.CALC_BUFFS_EFFECT]:
+	for sig in grouped_sigils[SigilEffect.SigilTriggers.CALC_BUFFS_EFFECT].duplicate():
 		sig.calc_buffs_effect()
 	
 	# Conduits
@@ -1001,11 +1001,11 @@ func calculate_buffs():
 	#		attack += 1
 
 	for c in slotManager.all_friendly_cards():
-		for sig in c.grouped_sigils[SigilEffect.SigilTriggers.STAT_MODIFYING_AURA]:
+		for sig in c.grouped_sigils[SigilEffect.SigilTriggers.STAT_MODIFYING_AURA].duplicate():
 			sig.stat_modifying_aura(self, friendly)
 			
 	for c in slotManager.all_enemy_cards():
-		for sig in c.grouped_sigils[SigilEffect.SigilTriggers.STAT_MODIFYING_AURA]:
+		for sig in c.grouped_sigils[SigilEffect.SigilTriggers.STAT_MODIFYING_AURA].duplicate():
 			sig.stat_modifying_aura(self, not friendly)
 	
 	attack = max(attack, 0)
@@ -1042,7 +1042,7 @@ func take_damage(damagingCard, dmgAmt = SigilEffect.UNDEFINED_DAMAGE_VAL):
 
 
 	#
-	for sig in grouped_sigils[SigilEffect.SigilTriggers.MODIFY_DAMAGE_TAKEN]:
+	for sig in grouped_sigils[SigilEffect.SigilTriggers.MODIFY_DAMAGE_TAKEN].duplicate():
 		dmgAmt = sig.modify_damage_taken(dmgAmt)
 
 	if dmgAmt > 0:
@@ -1050,7 +1050,7 @@ func take_damage(damagingCard, dmgAmt = SigilEffect.UNDEFINED_DAMAGE_VAL):
 	draw_stats()
 	
 	if damagingCard:
-		for sig in damagingCard.grouped_sigils[SigilEffect.SigilTriggers.ON_DAMAGE_CARD]:
+		for sig in damagingCard.grouped_sigils[SigilEffect.SigilTriggers.ON_DAMAGE_CARD].duplicate():
 			sig.on_damage_card(self, dmgAmt)
 
 	if health <= 0: #or (dmg_amt != SigilEffect.FULLY_NEGATED_DAMAGE_VAL and enemyCard and enemyCard.has_sigil("Touch of Death") and not has_sigil("Made of Stone")):
@@ -1067,7 +1067,7 @@ func is_alive():
 
 func calc_blood():
 	var blood = 1
-	for sig in grouped_sigils[SigilEffect.SigilTriggers.BONUS_BLOOD]:
+	for sig in grouped_sigils[SigilEffect.SigilTriggers.BONUS_BLOOD].duplicate():
 		blood += sig.bonus_blood()
 	return blood
 

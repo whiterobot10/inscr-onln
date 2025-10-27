@@ -89,7 +89,7 @@ func modify_damage_taken(dmg_amt: int):
 		return FULLY_NEGATED_DAMAGE_VAL
 	return dmg_amt
 
-
+#make it stop glowing when the last Stitched guy dies
 func handle_event(event: String, params: Array):
 	if event == "card_perished" and params[0].has_sigil("Stitched"):
 		if not slotManager.get_friendly_cards_sigil("Stitched") and not slotManager.get_enemy_cards_sigil("Stitched"):
